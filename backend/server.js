@@ -9,6 +9,7 @@ import getSessionConfig from './config/session.js';
 import authRouter from './routes/authRoutes.js';
 import errorHandler from './middleware/errorHandler.js'
 import notFound from './middleware/notFound.js'
+import doctorRouter from './routes/doctorRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(session(getSessionConfig()));
 
 app.use('/api/auth', authRouter);
+app.use('/api/doctors', doctorRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
