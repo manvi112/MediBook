@@ -16,8 +16,8 @@ const availabilitySchema = new mongoose.Schema(
       ],
       required: true,
     },
-    startTime: { type: String, required: true }, // "09:00"
-    endTime: { type: String, required: true }, // "17:00"
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
     slotDurationMinutes: { type: Number, default: 30 },
   },
   { _id: false }
@@ -39,8 +39,6 @@ const doctorProfileSchema = new mongoose.Schema(
     city: { type: String }, // for location-based search
     clinicAddress: { type: String },
 
-    // Gate: doctor can log in immediately, but won't show up in patient
-    // search until admin flips this to true.
     isApproved: { type: Boolean, default: false },
 
     weeklyAvailability: [availabilitySchema],
