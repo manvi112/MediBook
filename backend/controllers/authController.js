@@ -56,7 +56,15 @@ const signupPatient = async (req, res) => {
 
 const signupDoctor = async (req, res) => {
   try {
-    const { name, email, password, phone, specialization, city } = req.body;
+    const { name, email, password, phone, specialization, city, nmcRegistrationNumber } = req.body;
+
+    const degreeCertificate = req.files?.degreeCertificate?.[0]?.path;
+    const registrationCertificate = req.files?.registrationCertificate?.[0]?.path;
+
+    if (!degreeCertificate || !registrationCertificate) {
+      return res.status(400).json({ success: false, message: 'Both documents are required' });
+    }
+
 
     if (!name || !email || !password || !phone) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -100,6 +108,11 @@ const signupDoctor = async (req, res) => {
         specialization,
         city,
         isApproved: false,
+        nmcRegistrationNumber,
+        documents: {
+          degreeCertificate,
+          registrationCertificate,
+        },
       });
     } catch (error) {
       await userModel.findByIdAndDelete(doctor._id);

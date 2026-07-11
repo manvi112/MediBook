@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import connectDB from './config/mongodb.js';
 import getSessionConfig from './config/session.js';
+import './config/cloudinary.js';
 import authRouter from './routes/authRoutes.js';
 import errorHandler from './middleware/errorHandler.js'
 import notFound from './middleware/notFound.js'

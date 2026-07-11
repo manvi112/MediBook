@@ -42,6 +42,11 @@ const doctorProfileSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
 
     weeklyAvailability: [availabilitySchema],
+    nmcRegistrationNumber: { type: String },
+    documents: {
+      degreeCertificate: { type: String },
+      registrationCertificate: { type: String },
+    },
   },
   { timestamps: true }
 );
