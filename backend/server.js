@@ -13,6 +13,7 @@ import notFound from './middleware/notFound.js'
 import doctorRouter from './routes/doctorRoutes.js';
 import appointmentRouter from './routes/appointmentRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
+import patientRouter from './routes/patientRoutes.js';
 
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(session(getSessionConfig()));
 
 app.use('/api/auth', authRouter);
 app.use('/api/doctors', doctorRouter);
+app.use('/api/patient', patientRouter);
 app.use('/api/appointments', appointmentRouter);
 app.use('/api/admin', adminRouter);
 

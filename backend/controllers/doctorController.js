@@ -1,6 +1,7 @@
 import doctorProfileModel from '../models/doctorProfile.js';
 import appointmentModel from '../models/appointment.js';
 import { availableSlotsCheck } from '../utils/availableSlotsCheck.js';
+import userModel from '../models/user.js';
 
 
 export const getAllDoctors = async (req, res) => {
@@ -28,6 +29,14 @@ export const getDoctorById = async (req, res) => {
 
 export const updateDoctorProfile = async (req, res) => {
   try {
+    if (req.body.phone) {
+      await userModel.findByIdAndUpdate(
+        req.session.userId,
+        { $set: { phone: req.body.phone } },
+        { runValidators: true }
+      );
+    }
+
     const allowedFields = [
       'specialization',
       'qualification',
@@ -45,21 +54,21 @@ export const updateDoctorProfile = async (req, res) => {
       }
     });
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0 && !req.body.phone) {
       return res.status(400).json({ success: false, message: 'No valid fields to update' });
     }
 
-    const doctor = await doctorProfileModel.findByIdAndUpdate(
-      req.params.id,
+    const profile = await doctorProfileModel.findOneAndUpdate(
+      { user: req.session.userId },
       { $set: updates },
       { returnDocument: 'after', runValidators: true }
-    );
+    ).populate('user', '-password');
 
-    if (!doctor) {
-      return res.status(404).json({ success: false, message: 'Doctor not found' });
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Profile not found' });
     }
 
-    res.status(200).json({ success: true, doctor });
+    res.status(200).json({ success: true, profile });
 
   } catch (error) {
     console.log(error);
@@ -75,8 +84,8 @@ export const updateAvailability = async (req, res) => {
       return res.status(400).json({ success: false, message: 'weeklyAvailability must be an array' });
     }
 
-    const doctor = await doctorProfileModel.findByIdAndUpdate(
-      req.params.id,
+    const doctor = await doctorProfileModel.findOneAndUpdate(
+      { user: req.session.userId },
       { $set: { weeklyAvailability } },
       { returnDocument: 'after', runValidators: true }
     );
@@ -111,6 +120,23 @@ export const getAvailableSlots = async (req, res) => {
 
     res.status(200).json({ success: true, availableSlots });
 
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getDoctorProfile = async (req, res) => {
+  try {
+    const profile = await doctorProfileModel
+      .findOne({ user: req.session.userId })
+      .populate('user', '-password');
+
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Profile not found' });
+    }
+
+    res.status(200).json({ success: true, profile });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });

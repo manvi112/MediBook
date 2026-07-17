@@ -2,6 +2,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/user.js';
 import doctorProfileModel from '../models/doctorProfile.js';
+import patientProfileModel from '../models/patientProfile.js';
 
 const signupPatient = async (req, res) => {
   try {
@@ -41,6 +42,12 @@ const signupPatient = async (req, res) => {
       phone,
     });
 
+    try {
+      await patientProfileModel.create({ user: patient._id });
+    } catch (error) {
+      await userModel.findByIdAndDelete(patient._id);
+      throw error;
+    }
     req.session.userId = patient._id;
     req.session.role = patient.role;
 
