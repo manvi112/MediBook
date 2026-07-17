@@ -12,6 +12,7 @@ import errorHandler from './middleware/errorHandler.js'
 import notFound from './middleware/notFound.js'
 import doctorRouter from './routes/doctorRoutes.js';
 import appointmentRouter from './routes/appointmentRoutes.js';
+import adminRouter from './routes/adminRoutes.js';
 
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(session(getSessionConfig()));
 app.use('/api/auth', authRouter);
 app.use('/api/doctors', doctorRouter);
 app.use('/api/appointments', appointmentRouter);
+app.use('/api/admin', adminRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
