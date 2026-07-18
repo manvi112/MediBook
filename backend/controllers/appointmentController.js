@@ -2,6 +2,17 @@ import appointmentModel from "../models/appointment.js";
 import doctorProfileModel from '../models/doctorProfile.js';
 import { availableSlotsCheck } from '../utils/availableSlotsCheck.js';
 
+import notificationModel from '../models/notification.js';
+import userModel from '../models/user.js';
+import sendEmail from '../utils/sendEmail.js';
+import {
+  appointmentBookedDoctor,
+  appointmentConfirmedPatient,
+  appointmentCancelledPatient,
+  appointmentCancelledDoctor,
+  appointmentCompletedPatient,
+} from '../utils/emailTemplates.js';
+
 export const bookAppointment = async (req, res) => {
   try {
     const { doctorId, date, startTime, reason } = req.body;
@@ -41,9 +52,24 @@ export const bookAppointment = async (req, res) => {
       reason,
     });
 
+    const patient = await userModel.findById(req.session.userId);
+    const doctorUser = await userModel.findById(doctorId);
+
+    await notificationModel.create({
+      user: doctorId,
+      message: `New appointment request from ${patient.name} on ${date} at ${startTime}`,
+      type: 'appointment_booked',
+    });
+
+    const template = appointmentBookedDoctor(patient.name, date, startTime);
+    await sendEmail({ to: doctorUser.email, ...template });
+
     res.status(201).json({ success: true, appointment });
 
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'This slot was just booked by someone else' });
+    }
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
@@ -118,6 +144,48 @@ export const updateAppointmentStatus = async (req, res) => {
 
     appointment.status = status;
     await appointment.save();
+
+    const patient = await userModel.findById(appointment.patient);
+    const doctor = await userModel.findById(appointment.doctor);
+    const dateStr = appointment.date.toDateString();
+
+
+    if (status === 'confirmed') {
+      await notificationModel.create({
+        user: appointment.patient,
+        message: `Your appointment with Dr. ${doctor.name} has been confirmed`,
+        type: 'appointment_confirmed',
+      });
+      const template = appointmentConfirmedPatient(doctor.name, dateStr, appointment.startTime);
+      await sendEmail({ to: patient.email, ...template });
+
+    } else if (status === 'cancelled' && role === 'doctor') {
+      await notificationModel.create({
+        user: appointment.patient,
+        message: `Your appointment with Dr. ${doctor.name} has been cancelled`,
+        type: 'appointment_cancelled',
+      });
+      const template = appointmentCancelledPatient(doctor.name, dateStr, appointment.startTime);
+      await sendEmail({ to: patient.email, ...template });
+
+    } else if (status === 'cancelled' && role === 'patient') {
+      await notificationModel.create({
+        user: appointment.doctor,
+        message: `${patient.name} has cancelled their appointment on ${dateStr}`,
+        type: 'appointment_cancelled',
+      });
+      const template = appointmentCancelledDoctor(patient.name, dateStr, appointment.startTime);
+      await sendEmail({ to: doctor.email, ...template });
+
+    } else if (status === 'completed') {
+      await notificationModel.create({
+        user: appointment.patient,
+        message: `Your appointment with Dr. ${doctor.name} has been completed`,
+        type: 'appointment_reminder',
+      });
+      const template = appointmentCompletedPatient(doctor.name);
+      await sendEmail({ to: patient.email, ...template });
+    }
 
     res.status(200).json({ success: true, appointment });
 
