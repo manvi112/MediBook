@@ -15,6 +15,7 @@ import appointmentRouter from './routes/appointmentRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import patientRouter from './routes/patientRoutes.js';
 import notificationRouter from './routes/notificationRoutes.js';
+import chatRouter from './routes/chatRoutes.js';
 
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/patient', patientRouter);
 app.use('/api/appointments', appointmentRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/chat', chatRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

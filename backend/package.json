@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "seed:admin": "node scripts/seedAdmin.js"
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:kb": "node scripts/seedKnowledgeBase.js",
+    "test:rag": "node scripts/testRag.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,12 +16,14 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.41.3",
+    "cohere-ai": "^8.0.0",
     "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "groq-sdk": "^1.3.0",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
